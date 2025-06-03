@@ -9,6 +9,8 @@ mod handlers;
 mod state;
 mod models;
 
+#[cfg(test)]
+mod test;
 
 #[tokio::main]
 async fn main() {
