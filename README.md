@@ -15,6 +15,7 @@ src/
 ├── src/main.rs       # Entry point of the application.
 ├── src/models.rs     # Defines data models for requests and responses.
 ├── src/state.rs      # Defines the application state.
+├── src/test.rs       # Defines the integration test.
 ```
 
 ## Dependencies
