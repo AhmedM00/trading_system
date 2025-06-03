@@ -84,6 +84,32 @@ src/
 
 4. The server will start on http://0.0.0.0:3000.
 
+## Tests
+
+### Running Tests
+
+To ensure the correctness of the application, unit and integration tests are provided.
+
+1. Run all tests:
+   ```sh
+   cargo test
+   ```
+
+2. Example output:
+   ```
+   running 2 tests
+   test tests::test_add_batch_handler ... ok
+   test tests::test_get_stats_handler ... ok
+
+   test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out
+   ```
+
+### Test Coverage
+
+- **test_add_batch_handler**: Verifies that batches of trading data are added successfully.
+- **test_get_stats_handler**: Ensures statistical information is retrieved correctly for a given symbol and batch size.
+
+
 ## License
 
 This project is licensed under the MIT License.
