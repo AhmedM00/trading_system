@@ -1,4 +1,8 @@
+use std::collections::VecDeque;
+
 use serde::{Deserialize, Serialize};
+
+const MAX_POINTS_SIZE: i32 = 10_i32.pow(8);
 
 #[derive(Deserialize)]
 pub struct BatchRequest{
@@ -27,7 +31,7 @@ pub struct StatsResult {
 //trading data stats in "data_stats" varient
 #[derive(Default, Debug, Clone, Serialize)]
 pub struct TradingData{
-    data_points: Vec<f64>,
+    pub data_points: VecDeque<f64>,
     data_stats: Vec<DataStats>,
 }
 #[derive(Debug, Clone, Serialize)]
@@ -42,7 +46,7 @@ impl TradingData{
 
     pub fn new() -> Self{
         Self { 
-            data_points: Vec::new(), 
+            data_points: VecDeque::new(), 
             data_stats: vec![DataStats { min: f64::MAX, max: 0.0, sum: 0.0, sum_of_squared: 0.0 }; 8]
         }
     }
@@ -51,31 +55,29 @@ impl TradingData{
 
         let points_len = self.data_points.len();
         
-        //calculate the index to access data_stats,
-        //so that we put each 10e{k} in single vec element in data_stats vec
-        // we have k from 1 to 8 so we have data_stats vec of size 8
-        // data_stats[0] will have the stats for first 10e{1} data_points
-        // data_stats[1] will have the stats for first 10e{2} data_points
-        let index = ((points_len.saturating_sub(1)) as f64).log10() as usize;
-        
-        //get the last saved data_stats 
-        let stats = &mut self.data_stats[index];
-        let mut min = stats.min;
-        let mut max = stats.max;
-        let mut sum = stats.sum;
-        let mut sum_of_squared = stats.sum_of_squared;
-
         //iterate over the batch to be added
         for (i, &value) in batch.iter().enumerate(){
 
+            if (i + points_len + 1) as i32 > MAX_POINTS_SIZE{
+                self.data_points.pop_front();
+            }
+
             //push the batch data to data_points vector
-            self.data_points.push(value);
+            self.data_points.push_back(value);
 
-            //calculate the correct index to access the wanted data_stats
-            let index = ((i + points_len) as f64).log10() as usize;
+        }
+
+        //Initialize variables needed to calculate the stats
+        let mut min = f64::MAX;
+        let mut max = 0_f64;
+        let mut sum = 0_f64;
+        let mut sum_of_squared = 0_f64;
+
+        for (i, &value) in self.data_points.iter().rev().enumerate() {
+            let index = (i as f64).log10() as usize;
             let stats = &mut self.data_stats[index];
-
-            //compare last saved data_stats with the new batch data
+            
+            //compare last initialized variables with the new batch data
             min = min.min(value);
             max = max.max(value);
             sum += value;
@@ -100,14 +102,14 @@ impl TradingData{
 
         //return None if we don't have any data_points 
         //OR if 10e{k} = amount of data we need to analyze bigger than the amount of data we have in out data_points
-        if self.data_points.last().is_none() || k_len as usize > self.data_points.len() {
+        if self.data_points.back().is_none() || k_len as usize > self.data_points.len() {
             return None;
         }
 
         //calculate the wanted data (min, max, last, avg, var)
         let min = self.data_stats[index].min;
         let max = self.data_stats[index].max;
-        let last = *self.data_points.last().unwrap();
+        let last = *self.data_points.back().unwrap();
 
         let sum = self.data_stats[index].sum;
         let avg = sum / k_len;
