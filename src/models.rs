@@ -4,6 +4,10 @@ use serde::{Deserialize, Serialize};
 
 const MAX_POINTS_SIZE: i32 = 10_i32.pow(8);
 
+fn round_to_4_decimals(value: f64) -> f64 {
+    (value * 10000.0).round() / 10000.0
+}
+
 #[derive(Deserialize)]
 pub struct BatchRequest{
     pub symbol: String,
@@ -121,8 +125,8 @@ impl TradingData{
             min,
             max,
             last,
-            avg,
-            var,
+            avg: round_to_4_decimals(avg),
+            var: round_to_4_decimals(var),
         })
     }
 }

@@ -85,6 +85,6 @@ async fn test_get_stats_handler() {
     assert_eq!(response_json["min"], 1.1); 
     assert_eq!(response_json["max"], 12.4);
     assert_eq!(response_json["last"], 1.1);
-    assert_eq!(response_json["avg"], 6.0600000000000005);
-    assert_eq!(response_json["var"], 15.164399999999992);
+    assert_eq!(response_json["avg"], 6.06);
+    assert_eq!(response_json["var"], 15.1644);
 }
